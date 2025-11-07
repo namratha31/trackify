@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Total Income</h6>
+        <h3 class="text-success">${{ '%.2f'|format(total_income) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Total Expense</h6>
+        <h3 class="text-danger">${{ '%.2f'|format(total_expense) }}</h3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card p-3">
+        <h6>Balance</h6>
+        <h3>${{ '%.2f'|format(balance) }}</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card p-3 mb-3">
+        <h5>Expenses by Category</h5>
+        <canvas id="pieChart"></canvas>
+      </div>
+
+      <div class="card p-3">
+        <h5>Recent Transactions</h5>
+        <ul class="list-group list-group-flush">
+          {% for t in recent %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <div>
+                <strong>{{t.category.name if t.category else 'Uncategorized'}}</strong>
+                <div class="small text-muted">{{t.note}} • {{t.date}}</div>
+              </div>
+              <div class="text-end">
+                <div class="fw-bold {{ 'text-success' if t.type=='income' else 'text-danger' }}">${{ '%.2f'|format(t.amount) }}</div>
+              </div>
+            </li>
+          {% else %}
+            <li class="list-group-item">No transactions yet</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3 mb-3">
+        <h5>Monthly Balance (last months)</h5>
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchCat() {
+      const res = await fetch('/api/category_breakdown');
+      return await res.json();
+    }
+
+    (async ()=>{
+      const data = await fetchCat();
+      const labels = Object.keys(data);
+      const values = Object.values(data);
+
+      const pieCtx = document.getElementById('pieChart');
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: { labels, datasets: [{ data: values, backgroundColor: ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc949'] }] }
+      });
+
+      const months = {{ months|tojson }};
+      const monthVals = {{ month_vals|tojson }};
+      const lineCtx = document.getElementById('lineChart');
+      new Chart(lineCtx, {
+        type: 'line',
+        data: { labels: months, datasets: [{ label: 'Net', data: monthVals, fill: true, borderColor: '#4e79a7', backgroundColor: 'rgba(78,121,167,0.15)'}] }
+      });
+    })();
+  </script>
+{% endblock %}
