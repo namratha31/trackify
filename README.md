@@ -91,14 +91,3 @@ _pycache_/
 .vscode/
 ```
 
-## License
-This project is provided as-is for learning purposes. Add a LICENSE file if you want to choose a license (MIT is common for small projects).
-
----
-
-If you'd like, I can also:
-- Add a `.gitignore` and commit it
-- Add a LICENSE (MIT)
-- Add a simple `Makefile` or PowerShell script to run common dev tasks
-
-Tell me which of those you'd like and I'll add them.
