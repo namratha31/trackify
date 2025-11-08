@@ -87,7 +87,7 @@ Don't commit environment files, venvs or the local DB. Example entries:
 ```
 .venv/
 trackify.db
-__pycache__/
+_pycache_/
 .vscode/
 ```
 
