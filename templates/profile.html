@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title">Your Profile</h2>
+            <form method="POST">
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ profile.name if profile else '' }}" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" value="{{ profile.email if profile else '' }}" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Monthly Income (optional)</label>
+                    <input type="number" step="0.01" name="monthly_income" class="form-control" value="{{ profile.monthly_income if profile else 0 }}" />
+                    <div class="form-text">Providing your monthly income helps the app generate personalized savings goals.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Target Savings (optional)</label>
+                    <input type="number" step="0.01" name="target_savings" class="form-control" value="{{ profile.target_savings if profile else 0 }}" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Bio / Notes</label>
+                    <textarea name="bio" class="form-control" rows="3">{{ profile.bio if profile else '' }}</textarea>
+                </div>
+                <button class="btn btn-primary">Save Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
