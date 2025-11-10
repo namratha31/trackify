@@ -37,11 +37,13 @@ def ensure_db():
         # Ensure DB creation and seeding happen inside the Flask application context
         with app.app_context():
             db.create_all()
-            # seed with a few categories
-            for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
-                c = Category(name=name)
-                db.session.add(c)
-            db.session.commit()
+            # Only seed categories if none exist
+            if Category.query.count() == 0:
+                # seed with a few categories
+                for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
+                    c = Category(name=name)
+                    db.session.add(c)
+                db.session.commit()
 
 
 @app.route('/')
@@ -147,5 +149,14 @@ def api_category_breakdown():
 
 
 if __name__ == '__main__':
-    ensure_db()
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    print("\n🚀 Starting Trackify - Personal Finance Tracker")
+    print("\nMake sure you have:")
+    print("1. Activated your virtual environment (.venv)")
+    print("2. Installed requirements (pip install -r requirements.txt)")
+    print("\nServer Details:")
+    print("- URL: http://127.0.0.1:8080")
+    print("- Debug Mode: Enabled")
+    print("- Database: SQLite (trackify.db)")
+    print("\nPress Ctrl+C to stop the server\n")
+    
+    app.run(debug=True, host='127.0.0.1', port=8080)
