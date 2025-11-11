@@ -20,6 +20,10 @@
     <div class="mt-2">
       <input type="text" name="description" class="form-control" value="{{ goal.description }}" placeholder="Description (optional)">
     </div>
+    <div class="mt-2">
+      <input type="number" name="progress" class="form-control" value="{{ goal.progress }}" min="0" step="0.01" placeholder="Amount saved so far">
+      <small class="text-muted">Update your progress toward this goal</small>
+    </div>
   </form>
   <a href="{{ url_for('goals') }}" class="btn btn-secondary">Back to Goals</a>
 </div>

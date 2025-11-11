@@ -15,6 +15,12 @@ def edit_goal(goal_id):
                 goal.deadline = datetime.strptime(deadline, '%Y-%m-%d').date()
             except ValueError:
                 pass
+        # Update progress
+        progress = request.form.get('progress', '').strip()
+        try:
+            goal.progress = float(progress)
+        except ValueError:
+            pass
         db.session.commit()
         flash('Goal updated!', 'success')
         return redirect(url_for('goals'))
