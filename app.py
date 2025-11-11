@@ -1,3 +1,14 @@
+class Profile(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    monthly_income = db.Column(db.Float, default=0.0)
+    target_savings = db.Column(db.Float, default=0.0)
+    bio = db.Column(db.String(300))
+    profile_pic = db.Column(db.String(200))  # filename or URL
+
+    def __repr__(self):
+        return f"<Profile {self.name or 'Unnamed'}>"
 @app.route('/goals/edit/<int:goal_id>', methods=['GET', 'POST'])
 def edit_goal(goal_id):
     ensure_db()
