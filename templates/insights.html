@@ -77,6 +77,33 @@
                         </div>
                     </div>
                     {% endfor %}
+
+                    {% if user_goals %}
+                    <hr>
+                    <h5 class="mt-3">Your Personal Goals</h5>
+                    {% for goal in user_goals %}
+                    <div class="goal-card mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">{{ goal.name }}</h5>
+                            {% if goal.deadline %}
+                            <span class="badge bg-info">{{ goal.deadline.strftime('%Y-%m-%d') }}</span>
+                            {% endif %}
+                        </div>
+                        {% if goal.description %}
+                        <p class="text-muted mb-2">{{ goal.description }}</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Target Amount</small>
+                            <span class="fw-bold">${{ "%.2f"|format(goal.target_amount) }}</span>
+                        </div>
+                        <div class="progress mt-2" style="height: 18px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ (goal.progress/goal.target_amount*100)|round(1) if goal.target_amount else 0 }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="{{ goal.target_amount }}">
+                                ${{ goal.progress }} / ${{ goal.target_amount }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>

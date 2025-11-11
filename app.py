@@ -1,3 +1,32 @@
+@app.route('/goals', methods=['GET', 'POST'])
+def goals():
+    ensure_db()
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        target_amount = request.form.get('target_amount', '').strip()
+        description = request.form.get('description', '').strip()
+        deadline = request.form.get('deadline', '').strip()
+        try:
+            target_amount = float(target_amount)
+        except ValueError:
+            target_amount = 0.0
+        deadline_date = None
+        if deadline:
+            try:
+                deadline_date = datetime.strptime(deadline, '%Y-%m-%d').date()
+            except ValueError:
+                deadline_date = None
+        if name and target_amount > 0:
+            goal = SavingsGoal(name=name, target_amount=target_amount, description=description, deadline=deadline_date)
+            db.session.add(goal)
+            db.session.commit()
+            flash('Goal added!', 'success')
+            return redirect(url_for('goals'))
+        else:
+            flash('Please enter a name and valid target amount.', 'danger')
+
+    goals = SavingsGoal.query.order_by(SavingsGoal.deadline).all()
+    return render_template('goals.html', goals=goals)
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
@@ -33,35 +62,34 @@ class Transaction(db.Model):
         return f"<Tx {self.id} {self.type} {self.amount}>"
 
 
-class Profile(db.Model):
-    """Simple single-user profile to store basic info and monthly income/targets."""
+
+class SavingsGoal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(120), unique=True, nullable=True)
-    monthly_income = db.Column(db.Float, default=0.0)
-    target_savings = db.Column(db.Float, default=0.0)
-    bio = db.Column(db.String(300))
+    name = db.Column(db.String(100), nullable=False)
+    target_amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.String(300))
+    deadline = db.Column(db.Date, nullable=True)
+    progress = db.Column(db.Float, default=0.0)  # Amount saved so far
 
     def __repr__(self):
-        return f"<Profile {self.name or 'Unnamed'}>"
+        return f"<Goal {self.name}: {self.progress}/{self.target_amount}>"
 
 
 def ensure_db():
     """Create DB and seed categories & a default profile if DB doesn't exist."""
-    if not os.path.exists('trackify.db'):
-        with app.app_context():
-            db.create_all()
-            # seed categories if empty
-            if Category.query.count() == 0:
-                for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
-                    c = Category(name=name)
-                    db.session.add(c)
-                db.session.commit()
-            # seed a default profile for single-user flow
-            if Profile.query.count() == 0:
-                p = Profile(name='Your Name', email=None, monthly_income=0.0, target_savings=0.0, bio='')
-                db.session.add(p)
-                db.session.commit()
+    with app.app_context():
+        db.create_all()  # Will create any missing tables
+        # seed categories if empty
+        if Category.query.count() == 0:
+            for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
+                c = Category(name=name)
+                db.session.add(c)
+            db.session.commit()
+        # seed a default profile for single-user flow
+        if Profile.query.count() == 0:
+            p = Profile(name='Your Name', email=None, monthly_income=0.0, target_savings=0.0, bio='')
+            db.session.add(p)
+            db.session.commit()
 
 
 @app.route('/')
@@ -254,6 +282,9 @@ def insights():
         }
     ]
 
+    # Fetch user-defined goals
+    user_goals = SavingsGoal.query.order_by(SavingsGoal.deadline).all()
+
     # Money-saving challenges
     challenges = [
         {
@@ -277,6 +308,7 @@ def insights():
                          savings_rate=savings_rate,
                          tips=tips,
                          savings_goals=savings_goals,
+                         user_goals=user_goals,
                          challenges=challenges,
                          categories=sorted_categories,
                          profile=profile,
