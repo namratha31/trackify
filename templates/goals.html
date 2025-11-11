@@ -41,7 +41,12 @@
               ${{ goal.progress }} / ${{ goal.target_amount }}
             </div>
           </div>
-          <!-- TODO: Add edit/delete buttons -->
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('edit_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary">Edit</a>
+            <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this goal?');">Delete</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

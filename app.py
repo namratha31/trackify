@@ -1,3 +1,33 @@
+@app.route('/goals/edit/<int:goal_id>', methods=['GET', 'POST'])
+def edit_goal(goal_id):
+    ensure_db()
+    goal = SavingsGoal.query.get_or_404(goal_id)
+    if request.method == 'POST':
+        goal.name = request.form.get('name', '').strip()
+        try:
+            goal.target_amount = float(request.form.get('target_amount', goal.target_amount))
+        except ValueError:
+            pass
+        goal.description = request.form.get('description', '').strip()
+        deadline = request.form.get('deadline', '').strip()
+        if deadline:
+            try:
+                goal.deadline = datetime.strptime(deadline, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        db.session.commit()
+        flash('Goal updated!', 'success')
+        return redirect(url_for('goals'))
+    return render_template('edit_goal.html', goal=goal)
+
+@app.route('/goals/delete/<int:goal_id>', methods=['POST'])
+def delete_goal(goal_id):
+    ensure_db()
+    goal = SavingsGoal.query.get_or_404(goal_id)
+    db.session.delete(goal)
+    db.session.commit()
+    flash('Goal deleted!', 'info')
+    return redirect(url_for('goals'))
 @app.route('/goals', methods=['GET', 'POST'])
 def goals():
     ensure_db()

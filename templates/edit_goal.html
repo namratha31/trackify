@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>Edit Savings Goal</h2>
+  <form method="POST" class="card p-3 mb-4">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="text" name="name" class="form-control" value="{{ goal.name }}" required>
+      </div>
+      <div class="col-md-3">
+        <input type="number" name="target_amount" class="form-control" value="{{ goal.target_amount }}" min="1" step="0.01" required>
+      </div>
+      <div class="col-md-3">
+        <input type="date" name="deadline" class="form-control" value="{{ goal.deadline.strftime('%Y-%m-%d') if goal.deadline else '' }}">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Save</button>
+      </div>
+    </div>
+    <div class="mt-2">
+      <input type="text" name="description" class="form-control" value="{{ goal.description }}" placeholder="Description (optional)">
+    </div>
+  </form>
+  <a href="{{ url_for('goals') }}" class="btn btn-secondary">Back to Goals</a>
+</div>
+{% endblock %}
