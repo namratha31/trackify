@@ -1,85 +1,220 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div class="row mb-3">
-    <div class="col-md-4">
-      <div class="card p-3">
-        <h6>Total Income</h6>
-        <h3 class="text-success">${{ '%.2f'|format(total_income) }}</h3>
+<div class="container py-4">
+  <!-- Key Metrics -->
+  <div class="row mb-4">
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm border-0 rounded-3" style="border-left: 5px solid var(--success-color);">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-1"><i class="fas fa-arrow-up me-2" style="color: var(--success-color)"></i>Total Income</h6>
+              <h3 class="text-success mb-0">₹{{ '%.2f'|format(total_income) }}</h3>
+            </div>
+            <i class="fas fa-wallet fa-2x" style="color: var(--success-color); opacity: 0.2;"></i>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card p-3">
-        <h6>Total Expense</h6>
-        <h3 class="text-danger">${{ '%.2f'|format(total_expense) }}</h3>
+
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm border-0 rounded-3" style="border-left: 5px solid var(--danger-color);">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-1"><i class="fas fa-arrow-down me-2" style="color: var(--danger-color)"></i>Total Expense</h6>
+              <h3 class="text-danger mb-0">₹{{ '%.2f'|format(total_expense) }}</h3>
+            </div>
+            <i class="fas fa-credit-card fa-2x" style="color: var(--danger-color); opacity: 0.2;"></i>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="card p-3">
-        <h6>Balance</h6>
-        <h3>${{ '%.2f'|format(balance) }}</h3>
+
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm border-0 rounded-3" style="border-left: 5px solid var(--primary-color);">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="text-muted mb-1"><i class="fas fa-balance-scale me-2" style="color: var(--primary-color)"></i>Balance</h6>
+              <h3 class="mb-0" style="color: var(--primary-color);">₹{{ '%.2f'|format(balance) }}</h3>
+            </div>
+            <i class="fas fa-piggy-bank fa-2x" style="color: var(--primary-color); opacity: 0.2;"></i>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- Charts Row -->
+  <div class="row mb-4">
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-4">
+            <i class="fas fa-chart-pie me-2" style="color: var(--primary-color)"></i>Expenses by Category
+          </h5>
+          <canvas id="pieChart" style="max-height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-4">
+            <i class="fas fa-chart-line me-2" style="color: var(--primary-color)"></i>Monthly Balance
+          </h5>
+          <canvas id="lineChart" style="max-height: 300px;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Transactions & Goals Row -->
   <div class="row">
-    <div class="col-md-6">
-      <div class="card p-3 mb-3">
-        <h5>Expenses by Category</h5>
-        <canvas id="pieChart"></canvas>
-      </div>
-
-      <div class="card p-3">
-        <h5>Recent Transactions</h5>
-        <ul class="list-group list-group-flush">
-          {% for t in recent %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{{t.category.name if t.category else 'Uncategorized'}}</strong>
-                <div class="small text-muted">{{t.note}} • {{t.date}}</div>
-              </div>
-              <div class="text-end">
-                <div class="fw-bold {{ 'text-success' if t.type=='income' else 'text-danger' }}">${{ '%.2f'|format(t.amount) }}</div>
-              </div>
-            </li>
-          {% else %}
-            <li class="list-group-item">No transactions yet</li>
-          {% endfor %}
-        </ul>
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-history me-2" style="color: var(--primary-color)"></i>Recent Transactions
+            </h5>
+            <a href="{{ url_for('transactions') }}" class="btn btn-sm btn-outline-primary">View All</a>
+          </div>
+          <ul class="list-group list-group-flush">
+            {% for t in recent %}
+              <li class="list-group-item px-0 py-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-bold">{{ t.category.name if t.category else 'Uncategorized' }}</div>
+                    <small class="text-muted">{{ t.note if t.note else '—' }} • {{ t.date.strftime('%d %b') }}</small>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold {{ 'text-success' if t.type=='income' else 'text-danger' }}">
+                      {{ '+' if t.type=='income' else '-' }}₹{{ '%.2f'|format(t.amount) }}
+                    </div>
+                  </div>
+                </div>
+              </li>
+            {% else %}
+              <li class="list-group-item px-0 py-3 text-muted text-center">
+                <i class="fas fa-inbox me-2"></i>No transactions yet
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card p-3 mb-3">
-        <h5>Monthly Balance (last months)</h5>
-        <canvas id="lineChart"></canvas>
+    <!-- Goals Section -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="card-title mb-0">
+              <i class="fas fa-bullseye me-2" style="color: var(--primary-color)"></i>Your Savings Goals
+            </h5>
+            <a href="{{ url_for('goals') }}" class="btn btn-sm btn-outline-primary">All Goals</a>
+          </div>
+
+          {% if goals %}
+            <div class="goals-container">
+              {% for goal in goals[:3] %}
+              <div class="mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <div class="fw-bold">{{ goal.name }}</div>
+                    <small class="text-muted">
+                      {% if goal.deadline %}
+                        Due: {{ goal.deadline.strftime('%d %b %Y') }}
+                      {% else %}
+                        No deadline
+                      {% endif %}
+                    </small>
+                  </div>
+                  <div class="text-end text-muted small">
+                    ₹{{ '%.0f'|format(goal.progress) }} / ₹{{ '%.0f'|format(goal.target_amount) }}
+                  </div>
+                </div>
+                
+                {% set progress_percent = (goal.progress/goal.target_amount*100)|round(1) if goal.target_amount else 0 %}
+                <div class="progress" style="height: 8px; border-radius: 4px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: {{ [progress_percent, 100]|min }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="{{ goal.target_amount }}"></div>
+                </div>
+                <small class="text-muted mt-1 d-block">{{ progress_percent }}% Complete</small>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4 text-muted">
+              <i class="fas fa-lightbulb fa-2x mb-2 d-block" style="opacity: 0.5;"></i>
+              <small>No goals yet. <a href="{{ url_for('goals') }}">Create one now!</a></small>
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
+</div>
 
-  <script>
-    async function fetchCat() {
-      const res = await fetch('/api/category_breakdown');
-      return await res.json();
-    }
+<script>
+  async function fetchCat() {
+    const res = await fetch('/api/category_breakdown');
+    return await res.json();
+  }
 
-    (async ()=>{
-      const data = await fetchCat();
-      const labels = Object.keys(data);
-      const values = Object.values(data);
+  (async ()=>{
+    const data = await fetchCat();
+    const labels = Object.keys(data);
+    const values = Object.values(data);
 
-      const pieCtx = document.getElementById('pieChart');
+    const pieCtx = document.getElementById('pieChart');
+    if (labels.length > 0) {
       new Chart(pieCtx, {
         type: 'pie',
-        data: { labels, datasets: [{ data: values, backgroundColor: ['#4e79a7','#f28e2b','#e15759','#76b7b2','#59a14f','#edc949'] }] }
+        data: { 
+          labels, 
+          datasets: [{ 
+            data: values, 
+            backgroundColor: ['#3fb8af','#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'] 
+          }] 
+        },
+        options: { responsive: true, maintainAspectRatio: true }
       });
+    }
 
-      const months = {{ months|tojson }};
-      const monthVals = {{ month_vals|tojson }};
-      const lineCtx = document.getElementById('lineChart');
+    const months = {{ months|tojson }};
+    const monthVals = {{ month_vals|tojson }};
+    const lineCtx = document.getElementById('lineChart');
+    if (months.length > 0) {
       new Chart(lineCtx, {
         type: 'line',
-        data: { labels: months, datasets: [{ label: 'Net', data: monthVals, fill: true, borderColor: '#4e79a7', backgroundColor: 'rgba(78,121,167,0.15)'}] }
+        data: { 
+          labels: months, 
+          datasets: [{ 
+            label: 'Net Balance', 
+            data: monthVals, 
+            fill: true, 
+            borderColor: '#3fb8af', 
+            backgroundColor: 'rgba(63, 184, 175, 0.1)',
+            tension: 0.4,
+            borderWidth: 2
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: true,
+          plugins: { legend: { display: true, position: 'top' } }
+        }
       });
-    })();
-  </script>
+    }
+  })();
+</script>
+
+<style>
+  .goals-container .border-bottom:last-child {
+    border-bottom: none !important;
+  }
+</style>
 {% endblock %}

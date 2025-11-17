@@ -1,59 +1,157 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-  <h2 class="mb-3">Your Savings Goals</h2>
-  <form method="POST" class="card p-3 mb-4">
-    <div class="row g-2">
-      <div class="col-md-4">
-        <input type="text" name="name" class="form-control" placeholder="Goal name (e.g. Trip to Paris)" required>
-      </div>
-      <div class="col-md-3">
-        <input type="number" name="target_amount" class="form-control" placeholder="Target amount ($)" min="1" step="0.01" required>
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="deadline" class="form-control" placeholder="Deadline">
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-success w-100">Add Goal</button>
-      </div>
-    </div>
-    <div class="mt-2">
-      <input type="text" name="description" class="form-control" placeholder="Description (optional)">
-    </div>
-  </form>
+<div class="container py-5">
+    <!-- Add Goal Form -->
+    <div class="card shadow-lg border-0 rounded-3 mb-5">
+        <div class="card-body p-5">
+            <h3 class="card-title mb-4">
+                <i class="fas fa-bullseye me-2" style="color: var(--primary-gradient)"></i>Create New Savings Goal
+            </h3>
+            
+            {% with messages = get_flashed_messages(category_filter=['success']) %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>{{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-  {% if goals %}
-  <div class="row">
-    {% for goal in goals %}
-    <div class="col-md-6 mb-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h5 class="card-title">{{ goal.name }}</h5>
-          <p class="card-text">Target: <strong>${{ goal.target_amount }}</strong></p>
-          {% if goal.deadline %}
-          <p class="card-text">Deadline: {{ goal.deadline.strftime('%Y-%m-%d') }}</p>
-          {% endif %}
-          {% if goal.description %}
-          <p class="card-text">{{ goal.description }}</p>
-          {% endif %}
-          <div class="progress mb-2" style="height: 20px;">
-            <div class="progress-bar bg-info" role="progressbar" style="width: {{ (goal.progress/goal.target_amount*100)|round(1) if goal.target_amount else 0 }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="{{ goal.target_amount }}">
-              ${{ goal.progress }} / ${{ goal.target_amount }}
-            </div>
-          </div>
-          <div class="d-flex gap-2">
-            <a href="{{ url_for('edit_goal', goal_id=goal.id) }}" class="btn btn-sm btn-primary">Edit</a>
-            <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" style="display:inline;">
-              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this goal?');">Delete</button>
+            <form method="POST" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Goal Name <span class="text-danger">*</span></label>
+                    <input type="text" name="name" class="form-control form-control-lg" placeholder="e.g., Trip to Paris" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Target Amount <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" name="target_amount" class="form-control" placeholder="0.00" min="1" step="0.01" required>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Deadline <span class="badge bg-info ms-1">Optional</span></label>
+                    <input type="date" name="deadline" class="form-control form-control-lg">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-plus-circle me-2"></i>Add Goal
+                    </button>
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Description <span class="badge bg-info ms-1">Optional</span></label>
+                    <textarea name="description" class="form-control form-control-lg" placeholder="What's this goal about?" rows="2"></textarea>
+                </div>
             </form>
-          </div>
         </div>
-      </div>
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p>No goals yet. Add one above!</p>
-  {% endif %}
+
+    <!-- Goals List -->
+    <div>
+        <h3 class="mb-4">
+            <i class="fas fa-list me-2" style="color: var(--primary-gradient)"></i>Your Goals
+        </h3>
+
+        {% if goals %}
+        <div class="row">
+            {% for goal in goals %}
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow border-0 rounded-3 h-100 transition-all" style="border-left: 5px solid var(--primary-color);">
+                    <div class="card-body p-4">
+                        <!-- Goal Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">{{ goal.name }}</h5>
+                                {% if goal.deadline %}
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar-alt me-1"></i>Due: {{ goal.deadline.strftime('%d %b %Y') }}
+                                </small>
+                                {% endif %}
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 mb-0 text-primary">₹{{ '%.2f'|format(goal.target_amount) }}</div>
+                                <small class="text-muted">Target</small>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        {% if goal.description %}
+                        <p class="card-text text-muted small mb-3">{{ goal.description }}</p>
+                        {% endif %}
+
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            {% set progress_percent = (goal.progress/goal.target_amount*100)|round(1) if goal.target_amount else 0 %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <small class="fw-bold">Progress</small>
+                                <small class="fw-bold">{{ progress_percent }}%</small>
+                            </div>
+                            <div class="progress" style="height: 25px; border-radius: 10px; overflow: hidden;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="{{ goal.target_amount }}">
+                                    {% if progress_percent > 20 %}
+                                    <small class="text-white fw-bold ms-2">₹{{ '%.2f'|format(goal.progress) }} / ₹{{ '%.2f'|format(goal.target_amount) }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if progress_percent <= 20 %}
+                            <small class="text-muted mt-2 d-block">₹{{ '%.2f'|format(goal.progress) }} / ₹{{ '%.2f'|format(goal.target_amount) }}</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('edit_goal', goal_id=goal.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this goal?');">
+                                    <i class="fas fa-trash-alt me-1"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center py-5 rounded-3">
+            <i class="fas fa-lightbulb fa-3x mb-3 d-block" style="opacity: 0.5;"></i>
+            <h5>No savings goals yet</h5>
+            <p class="mb-0 text-muted">Create your first goal above and start saving towards your dreams!</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
+
+<style>
+    .form-control-lg, .input-group-lg {
+        border-radius: 0.5rem;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus, .form-control-lg:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(63, 184, 175, 0.1);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #e0e0e0;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
 {% endblock %}

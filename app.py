@@ -154,7 +154,9 @@ def index():
         monthly[key] += t.amount if t.type == 'income' else -t.amount
     months = sorted(monthly.keys())[-6:]
     month_vals = [monthly[m] for m in months]
-    return render_template('index.html', total_income=total_income, total_expense=total_expense, balance=balance, recent=recent, cat_sums=cat_sums, months=months, month_vals=month_vals, user=g.user)
+    # Get user's goals
+    goals = SavingsGoal.query.filter_by(user_id=g.user.id).all()
+    return render_template('index.html', total_income=total_income, total_expense=total_expense, balance=balance, recent=recent, cat_sums=cat_sums, months=months, month_vals=month_vals, goals=goals, user=g.user)
 
 @app.route('/transactions')
 @login_required

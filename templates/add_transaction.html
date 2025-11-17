@@ -1,46 +1,109 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div class="card p-3">
-    <h4>Add Transaction</h4>
-    <form method="post">
-      <div class="mb-2">
-        <label class="form-label">Amount</label>
-        <input required name="amount" type="number" step="0.01" class="form-control" />
-      </div>
-      <div class="mb-2">
-        <label class="form-label">Type</label>
-        <select name="type" class="form-select">
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
-      </div>
-      <div class="mb-2">
-        <label class="form-label">Category</label>
-        <select name="category" class="form-select" id="catSelect">
-          <option value="">Uncategorized</option>
-          {% for c in categories %}
-            <option value="{{c.id}}">{{c.name}}</option>
-          {% endfor %}
-          <option value="new">+ Add new category</option>
-        </select>
-        <input name="new_category" id="newCat" class="form-control mt-2" placeholder="New category name" style="display:none;" />
-      </div>
-      <div class="mb-2">
-        <label class="form-label">Date</label>
-        <input name="date" type="date" class="form-control" />
-      </div>
-      <div class="mb-2">
-        <label class="form-label">Note (optional)</label>
-        <input name="note" type="text" class="form-control" />
-      </div>
-      <button class="btn btn-primary">Add</button>
-    </form>
-  </div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-plus-circle me-2" style="color: var(--primary-gradient)"></i>Add Transaction
+                    </h2>
 
-  <script>
+                    {% with messages = get_flashed_messages(category_filter=['danger']) %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Amount <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">₹</span>
+                                    <input required name="amount" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Type <span class="text-danger">*</span></label>
+                                <select name="type" class="form-select form-select-lg">
+                                    <option value="expense" selected>
+                                        <i class="fas fa-minus-circle"></i> Expense
+                                    </option>
+                                    <option value="income">
+                                        <i class="fas fa-plus-circle"></i> Income
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                            <select name="category" class="form-select form-select-lg" id="catSelect">
+                                <option value="">📁 Uncategorized</option>
+                                {% for c in categories %}
+                                    <option value="{{c.id}}">{{ c.name }}</option>
+                                {% endfor %}
+                                <option value="new">➕ Add new category</option>
+                            </select>
+                            <input name="new_category" id="newCat" class="form-control form-control-lg mt-2" placeholder="Enter new category name" style="display:none;" />
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                                <input name="date" type="date" class="form-control form-control-lg" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Note <span class="badge bg-info ms-1">Optional</span></label>
+                                <input name="note" type="text" class="form-control form-control-lg" placeholder="e.g., Lunch at office" />
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                            <a href="{{ url_for('transactions') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Add Transaction
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-select-lg, .form-control-lg {
+        border-radius: 0.5rem;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-select-lg:focus, .form-control-lg:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(63, 184, 175, 0.1);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #e0e0e0;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+</style>
+
+<script>
     document.getElementById('catSelect').addEventListener('change', (e)=>{
-      const newCat = document.getElementById('newCat');
-      newCat.style.display = e.target.value === 'new' ? 'block' : 'none';
+        const newCat = document.getElementById('newCat');
+        newCat.style.display = e.target.value === 'new' ? 'block' : 'none';
     });
-  </script>
+</script>
 {% endblock %}

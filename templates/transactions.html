@@ -1,29 +1,88 @@
 {% extends 'base.html' %}
 {% block content %}
-  <div class="card p-3">
-    <h4>All Transactions</h4>
-    <table class="table">
-      <thead>
-        <tr><th>Date</th><th>Type</th><th>Category</th><th>Note</th><th class="text-end">Amount</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for t in transactions %}
-          <tr>
-            <td>{{t.date}}</td>
-            <td>{{t.type}}</td>
-            <td>{{t.category.name if t.category else '—'}}</td>
-            <td>{{t.note}}</td>
-            <td class="text-end {{ 'text-success' if t.type=='income' else 'text-danger' }}">${{ '%.2f'|format(t.amount) }}</td>
-            <td>
-              <form method="post" action="/delete/{{t.id}}" onsubmit="return confirm('Delete?')">
-                <button class="btn btn-sm btn-outline-danger">Delete</button>
-              </form>
-            </td>
-          </tr>
-        {% else %}
-          <tr><td colspan="6">No transactions yet</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="card-title mb-0">
+                    <i class="fas fa-exchange-alt me-2" style="color: var(--primary-gradient)"></i>All Transactions
+                </h2>
+                <a href="{{ url_for('add_transaction') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Add Transaction
+                </a>
+            </div>
+
+            {% if transactions %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead style="background-color: #f8f9fa;">
+                        <tr>
+                            <th><i class="fas fa-calendar-alt me-2"></i>Date</th>
+                            <th><i class="fas fa-tag me-2"></i>Type</th>
+                            <th><i class="fas fa-folder me-2"></i>Category</th>
+                            <th><i class="fas fa-sticky-note me-2"></i>Note</th>
+                            <th class="text-end"><i class="fas fa-money-bill me-2"></i>Amount</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr class="border-bottom">
+                            <td>
+                                <small class="text-muted">{{ t.date.strftime('%d %b %Y') }}</small>
+                            </td>
+                            <td>
+                                {% if t.type == 'income' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-plus-circle me-1"></i>Income
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-minus-circle me-1"></i>Expense
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if t.category %}
+                                    <span class="badge bg-info bg-opacity-10 text-dark">{{ t.category.name }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ t.note if t.note else '—' }}</small>
+                            </td>
+                            <td class="text-end fw-bold">
+                                <span class="{{ 'text-success' if t.type=='income' else 'text-danger' }}">
+                                    {{ '+' if t.type=='income' else '-' }}₹{{ '%.2f'|format(t.amount) }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <form method="post" action="/delete/{{t.id}}" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this transaction?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-inbox fa-3x mb-3 d-block" style="opacity: 0.5;"></i>
+                <h5>No transactions yet</h5>
+                <p class="mb-0 text-muted">Start adding your first transaction to track your finances!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(63, 184, 175, 0.05) !important;
+    }
+</style>
 {% endblock %}

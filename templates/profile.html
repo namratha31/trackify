@@ -1,35 +1,121 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="card">
-        <div class="card-body">
-            <h2 class="card-title">Your Profile</h2>
-            <form method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" name="name" class="form-control" value="{{ profile.name if profile else '' }}" />
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-user-circle me-2" style="color: var(--primary-gradient)"></i> Your Profile
+                    </h2>
+                    
+                    {% with messages = get_flashed_messages(category_filter=['success']) %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        <!-- Profile Picture -->
+                        <div class="mb-4 text-center">
+                            <div class="mb-3">
+                                {% if user.profile_pic %}
+                                    <img src="/static/uploads/{{ user.profile_pic }}" class="rounded-circle" width="120" height="120" style="object-fit: cover; border: 4px solid var(--secondary-color);">
+                                {% else %}
+                                    <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; border: 4px solid var(--secondary-color);">
+                                        <i class="fas fa-user fa-3x" style="color: var(--secondary-color); opacity: 0.5;"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Profile Picture</label>
+                                <input type="file" name="profile_pic" class="form-control" accept="image/*">
+                                <div class="form-text">JPG, PNG or GIF (Max 5MB)</div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Personal Info -->
+                        <h5 class="mb-3"><i class="fas fa-info-circle me-2" style="color: var(--primary-gradient)"></i>Personal Information</h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Name</label>
+                                <input type="text" name="name" class="form-control form-control-lg" value="{{ user.name if user else '' }}" placeholder="Your name" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email</label>
+                                <input type="email" name="email" class="form-control form-control-lg" value="{{ user.email if user else '' }}" placeholder="your@email.com" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Bio / Notes</label>
+                            <textarea name="bio" class="form-control form-control-lg" rows="3" placeholder="Tell us about yourself...">{{ user.bio if user else '' }}</textarea>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Financial Info -->
+                        <h5 class="mb-3"><i class="fas fa-wallet me-2" style="color: var(--success-color)"></i>Financial Information</h5>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Monthly Income <span class="badge bg-info ms-1">Optional</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" name="monthly_income" class="form-control" value="{{ user.monthly_income if user.monthly_income else 0 }}" placeholder="0.00" />
+                                </div>
+                                <div class="form-text">Helps generate personalized savings recommendations</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Target Monthly Savings <span class="badge bg-info ms-1">Optional</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" name="target_savings" class="form-control" value="{{ user.target_savings if user.target_savings else 0 }}" placeholder="0.00" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Profile
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" value="{{ profile.email if profile else '' }}" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Monthly Income (optional)</label>
-                    <input type="number" step="0.01" name="monthly_income" class="form-control" value="{{ profile.monthly_income if profile else 0 }}" />
-                    <div class="form-text">Providing your monthly income helps the app generate personalized savings goals.</div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Target Savings (optional)</label>
-                    <input type="number" step="0.01" name="target_savings" class="form-control" value="{{ profile.target_savings if profile else 0 }}" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Bio / Notes</label>
-                    <textarea name="bio" class="form-control" rows="3">{{ profile.bio if profile else '' }}</textarea>
-                </div>
-                <button class="btn btn-primary">Save Profile</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .form-control-lg {
+        border-radius: 0.5rem;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(63, 184, 175, 0.1);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #e0e0e0;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+</style>
 {% endblock %}
