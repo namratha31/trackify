@@ -85,16 +85,19 @@ def signup():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        email = request.form.get('email', '').strip() or None
-        if not username or not password:
-            flash('Username and password required', 'danger')
+        email = request.form.get('email', '').strip()
+        
+        if not username or not password or not email:
+            flash('Username, password, and email are required', 'danger')
         elif User.query.filter_by(username=username).first():
-            flash('Username exists', 'danger')
+            flash('Username already exists', 'danger')
+        elif User.query.filter_by(email=email).first():
+            flash('Email already registered', 'danger')
         else:
             user = User(username=username, password=generate_password_hash(password), email=email, name=username)
             db.session.add(user)
             db.session.commit()
-            flash('Signup success! Login now.', 'success')
+            flash('✓ Signup successful! Please login now.', 'success')
             return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -103,14 +106,18 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            session.clear()
-            session['user_id'] = user.id
-            flash(f'Welcome {user.name}!', 'success')
-            return redirect(url_for('index'))
+        
+        if not username or not password:
+            flash('Username and password are required', 'danger')
         else:
-            flash('Invalid login', 'danger')
+            user = User.query.filter_by(username=username).first()
+            if user and check_password_hash(user.password, password):
+                session.clear()
+                session['user_id'] = user.id
+                flash(f'✓ Welcome {user.name}!', 'success')
+                return redirect(url_for('index'))
+            else:
+                flash('❌ Invalid username or password', 'danger')
     return render_template('login.html')
 
 @app.route('/logout')
