@@ -64,12 +64,20 @@ def load_user():
     user_id = session.get('user_id')
     g.user = User.query.get(user_id) if user_id else None
 
+# Initialize database on app startup
 with app.app_context():
+    try:
+        # Drop all old tables and recreate fresh
+        db.drop_all()
+    except:
+        pass
     db.create_all()
+    # Seed categories
     if Category.query.count() == 0:
         for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
             db.session.add(Category(name=name))
         db.session.commit()
+    print("✓ Database initialized successfully")
 
 def login_required(f):
     @wraps(f)
