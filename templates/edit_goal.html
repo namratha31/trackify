@@ -1,30 +1,103 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-  <h2>Edit Savings Goal</h2>
-  <form method="POST" class="card p-3 mb-4">
-    <div class="row g-2">
-      <div class="col-md-4">
-        <input type="text" name="name" class="form-control" value="{{ goal.name }}" required>
-      </div>
-      <div class="col-md-3">
-        <input type="number" name="target_amount" class="form-control" value="{{ goal.target_amount }}" min="1" step="0.01" required>
-      </div>
-      <div class="col-md-3">
-        <input type="date" name="deadline" class="form-control" value="{{ goal.deadline.strftime('%Y-%m-%d') if goal.deadline else '' }}">
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Save</button>
-      </div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-body p-5">
+                    <h2 class="card-title mb-4">
+                        <i class="fas fa-edit me-2" style="color: var(--primary-gradient)"></i>Edit Savings Goal
+                    </h2>
+
+                    {% with messages = get_flashed_messages(category_filter=['success']) %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>{{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Goal Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control form-control-lg" value="{{ goal.name }}" required>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Target Amount <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" name="target_amount" class="form-control" value="{{ goal.target_amount }}" min="1" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Amount Saved <span class="text-danger">*</span></label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" name="progress" class="form-control" value="{{ goal.progress }}" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Deadline <span class="badge bg-info ms-1">Optional</span></label>
+                            <input type="date" name="deadline" class="form-control form-control-lg" value="{{ goal.deadline.strftime('%Y-%m-%d') if goal.deadline else '' }}">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Description <span class="badge bg-info ms-1">Optional</span></label>
+                            <textarea name="description" class="form-control form-control-lg" rows="3" placeholder="What's this goal for?">{{ goal.description }}</textarea>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        {% set progress_percent = (goal.progress/goal.target_amount*100)|round(1) if goal.target_amount else 0 %}
+                        <div class="mb-4 p-3 bg-light rounded-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <small class="fw-bold">Current Progress</small>
+                                <small class="fw-bold">{{ progress_percent }}%</small>
+                            </div>
+                            <div class="progress" style="height: 25px; border-radius: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ [progress_percent, 100]|min }}%;" aria-valuenow="{{ goal.progress }}" aria-valuemin="0" aria-valuemax="{{ goal.target_amount }}"></div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">₹{{ '%.2f'|format(goal.progress) }} / ₹{{ '%.2f'|format(goal.target_amount) }}</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('goals') }}" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="mt-2">
-      <input type="text" name="description" class="form-control" value="{{ goal.description }}" placeholder="Description (optional)">
-    </div>
-    <div class="mt-2">
-      <input type="number" name="progress" class="form-control" value="{{ goal.progress }}" min="0" step="0.01" placeholder="Amount saved so far">
-      <small class="text-muted">Update your progress toward this goal</small>
-    </div>
-  </form>
-  <a href="{{ url_for('goals') }}" class="btn btn-secondary">Back to Goals</a>
 </div>
+
+<style>
+    .form-control-lg, .input-group-lg {
+        border-radius: 0.5rem;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control-lg:focus, .form-control-lg:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(63, 184, 175, 0.1);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #e0e0e0;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
+</style>
 {% endblock %}

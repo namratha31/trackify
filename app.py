@@ -261,6 +261,32 @@ def goals():
     goals = SavingsGoal.query.filter_by(user_id=g.user.id).all()
     return render_template('goals.html', goals=goals)
 
+@app.route('/goals/edit/<int:goal_id>', methods=['GET', 'POST'])
+@login_required
+def edit_goal(goal_id):
+    goal = SavingsGoal.query.filter_by(id=goal_id, user_id=g.user.id).first_or_404()
+    if request.method == 'POST':
+        goal.name = request.form.get('name', '').strip() or goal.name
+        try:
+            goal.target_amount = float(request.form.get('target_amount') or goal.target_amount)
+        except:
+            pass
+        try:
+            goal.progress = float(request.form.get('progress') or goal.progress)
+        except:
+            pass
+        goal.description = request.form.get('description', '').strip() or goal.description
+        deadline_str = request.form.get('deadline', '').strip()
+        if deadline_str:
+            try:
+                goal.deadline = datetime.strptime(deadline_str, '%Y-%m-%d').date()
+            except:
+                pass
+        db.session.commit()
+        flash('✓ Goal updated!', 'success')
+        return redirect(url_for('goals'))
+    return render_template('edit_goal.html', goal=goal)
+
 @app.route('/goals/delete/<int:goal_id>', methods=['POST'])
 @login_required
 def delete_goal(goal_id):
