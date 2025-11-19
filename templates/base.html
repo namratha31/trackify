@@ -21,21 +21,25 @@
             <li class="nav-item"><a class="nav-link" href="/insights">
               <i class="fas fa-lightbulb"></i> Insights
             </a></li>
-            <li class="nav-item"><a class="nav-link" href="/profile">
-              <i class="fas fa-user"></i> Profile
-            </a></li>
-              <li class="nav-item"><a class="nav-link" href="/goals">Goals</a></li>
+            <li class="nav-item"><a class="nav-link" href="/goals">Goals</a></li>
           </ul>
           <div class="d-flex align-items-center ms-auto">
             {% if g.user %}
-            <span class="text-white me-3">
-              {% if g.user.profile_pic %}
-                <img src="/static/uploads/{{ g.user.profile_pic }}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-              {% else %}
-                <i class="fas fa-user-circle fa-2x"></i>
-              {% endif %}
-              {{ g.user.name }}
-            </span>
+            <div class="dropdown me-2">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; color: white;">
+                {% if g.user.profile_pic %}
+                  <img src="/static/uploads/{{ g.user.profile_pic }}" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 8px;">
+                {% else %}
+                  <i class="fas fa-user-circle fa-2x me-2"></i>
+                {% endif %}
+                <span>{{ g.user.name or g.user.username }}</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                <li><a class="dropdown-item" href="/profile"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-muted"><small>{{ g.user.email }}</small></a></li>
+              </ul>
+            </div>
             <a href="{{ url_for('logout') }}" class="btn btn-light btn-sm">Logout</a>
             {% endif %}
           </div>
