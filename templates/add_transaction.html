@@ -26,8 +26,9 @@
                                 <label class="form-label fw-bold">Amount <span class="text-danger">*</span></label>
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text">₹</span>
-                                    <input required name="amount" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                                    <input required name="amount" type="number" step="0.01" class="form-control" placeholder="0.00" id="amountInput" />
                                 </div>
+                                <small class="text-muted" id="amountHint"></small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Type <span class="text-danger">*</span></label>
@@ -57,7 +58,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Date <span class="text-danger">*</span></label>
-                                <input name="date" type="date" class="form-control form-control-lg" required />
+                                <input name="date" type="date" class="form-control form-control-lg" required id="dateInput" />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Note <span class="badge bg-info ms-1">Optional</span></label>
@@ -101,9 +102,46 @@
 </style>
 
 <script>
+    // Auto-populate today's date
+    document.getElementById('dateInput').valueAsDate = new Date();
+    
+    // Category selector
     document.getElementById('catSelect').addEventListener('change', (e)=>{
         const newCat = document.getElementById('newCat');
         newCat.style.display = e.target.value === 'new' ? 'block' : 'none';
+    });
+    
+    // Smart category suggestions based on transaction type
+    const typeSelect = document.querySelector('select[name="type"]');
+    const catSelect = document.getElementById('catSelect');
+    const amountInput = document.getElementById('amountInput');
+    const amountHint = document.getElementById('amountHint');
+    
+    typeSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'income') {
+            // Auto-select Salary category for income if it exists
+            const salaryOption = Array.from(catSelect.options).find(opt => opt.text === 'Salary');
+            if (salaryOption) catSelect.value = salaryOption.value;
+            amountHint.textContent = '💡 Tip: Income will automatically update your savings goals!';
+            amountHint.style.color = '#28a745';
+        } else {
+            catSelect.value = '';
+            amountHint.textContent = '';
+        }
+    });
+    
+    // Real-time amount validation
+    amountInput.addEventListener('input', (e) => {
+        const amount = parseFloat(e.target.value);
+        if (amount > 0) {
+            if (typeSelect.value === 'expense' && amount > 10000) {
+                amountHint.textContent = '⚠️ Large expense! Consider breaking it into categories.';
+                amountHint.style.color = '#ffc107';
+            } else if (typeSelect.value === 'income') {
+                amountHint.textContent = '💡 Tip: Income will automatically update your savings goals!';
+                amountHint.style.color = '#28a745';
+            }
+        }
     });
 </script>
 {% endblock %}

@@ -77,7 +77,55 @@ with app.app_context():
         for name in ['Salary', 'Groceries', 'Transport', 'Entertainment', 'Utilities', 'Other']:
             db.session.add(Category(name=name))
         db.session.commit()
-    print("✓ Database initialized successfully")
+    
+    # Add dummy user and data
+    if User.query.count() == 0:
+        demo_user = User(
+            username='demo',
+            password=generate_password_hash('demo123'),
+            email='demo@trackify.com',
+            name='Demo User',
+            monthly_income=50000.0,
+            target_savings=15000.0,
+            bio='Just testing out Trackify!'
+        )
+        db.session.add(demo_user)
+        db.session.commit()
+        
+        # Add dummy transactions
+        categories = {cat.name: cat.id for cat in Category.query.all()}
+        from datetime import timedelta
+        today = date.today()
+        
+        dummy_transactions = [
+            # Income
+            Transaction(user_id=demo_user.id, amount=45000, type='Income', category_id=categories['Salary'], date=today - timedelta(days=25), note='Monthly salary'),
+            Transaction(user_id=demo_user.id, amount=5000, type='Income', category_id=categories['Other'], date=today - timedelta(days=20), note='Freelance project'),
+            # Expenses
+            Transaction(user_id=demo_user.id, amount=3500, type='Expense', category_id=categories['Groceries'], date=today - timedelta(days=22), note='Monthly groceries'),
+            Transaction(user_id=demo_user.id, amount=1200, type='Expense', category_id=categories['Transport'], date=today - timedelta(days=20), note='Petrol and metro'),
+            Transaction(user_id=demo_user.id, amount=800, type='Expense', category_id=categories['Entertainment'], date=today - timedelta(days=18), note='Movie night'),
+            Transaction(user_id=demo_user.id, amount=2500, type='Expense', category_id=categories['Utilities'], date=today - timedelta(days=15), note='Electricity bill'),
+            Transaction(user_id=demo_user.id, amount=1500, type='Expense', category_id=categories['Groceries'], date=today - timedelta(days=10), note='Weekly shopping'),
+            Transaction(user_id=demo_user.id, amount=600, type='Expense', category_id=categories['Transport'], date=today - timedelta(days=8), note='Cab rides'),
+            Transaction(user_id=demo_user.id, amount=2000, type='Expense', category_id=categories['Entertainment'], date=today - timedelta(days=5), note='Restaurant dinner'),
+            Transaction(user_id=demo_user.id, amount=1000, type='Expense', category_id=categories['Other'], date=today - timedelta(days=3), note='Online shopping'),
+        ]
+        db.session.bulk_save_objects(dummy_transactions)
+        db.session.commit()
+        
+        # Add dummy savings goals
+        dummy_goals = [
+            SavingsGoal(user_id=demo_user.id, name='Emergency Fund', target_amount=100000, progress=35000, description='6 months of expenses', deadline=today + timedelta(days=180)),
+            SavingsGoal(user_id=demo_user.id, name='Vacation', target_amount=50000, progress=12000, description='Trip to Goa', deadline=today + timedelta(days=90)),
+            SavingsGoal(user_id=demo_user.id, name='New Laptop', target_amount=80000, progress=25000, description='MacBook Pro', deadline=today + timedelta(days=120)),
+        ]
+        db.session.bulk_save_objects(dummy_goals)
+        db.session.commit()
+        
+        print("✓ Database initialized with demo data")
+    else:
+        print("✓ Database initialized successfully")
 
 def login_required(f):
     @wraps(f)
@@ -190,7 +238,27 @@ def add_transaction():
             tx = Transaction(user_id=g.user.id, amount=amt, type=ttype, category=cat, note=note, date=dt)
             db.session.add(tx)
             db.session.commit()
-            flash('Added!', 'success')
+            
+            # Auto-update goal progress for income transactions
+            if ttype == 'income':
+                # Calculate savings (total income - total expenses)
+                all_txs = Transaction.query.filter_by(user_id=g.user.id).all()
+                total_income = sum(t.amount for t in all_txs if t.type == 'income')
+                total_expense = sum(t.amount for t in all_txs if t.type == 'expense')
+                savings = total_income - total_expense
+                
+                # Update all goals proportionally
+                goals = SavingsGoal.query.filter_by(user_id=g.user.id).all()
+                if goals:
+                    # Distribute savings across goals based on their target amounts
+                    total_target = sum(g.target_amount for g in goals)
+                    for goal in goals:
+                        if total_target > 0:
+                            proportion = goal.target_amount / total_target
+                            goal.progress = min(savings * proportion, goal.target_amount)
+                    db.session.commit()
+            
+            flash('✓ Transaction added successfully!', 'success')
             return redirect(url_for('index'))
         except Exception as e:
             flash(f'Error: {e}', 'danger')

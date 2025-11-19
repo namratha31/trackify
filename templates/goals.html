@@ -33,7 +33,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-bold">Deadline <span class="badge bg-info ms-1">Optional</span></label>
-                    <input type="date" name="deadline" class="form-control form-control-lg">
+                    <input type="date" name="deadline" class="form-control form-control-lg" id="goalDeadline">
                 </div>
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-success btn-lg w-100">
@@ -154,4 +154,31 @@
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
+
+<script>
+    // Auto-suggest deadline (30 days from today)
+    const deadlineInput = document.getElementById('goalDeadline');
+    const targetInput = document.querySelector('input[name="target_amount"]');
+    
+    targetInput.addEventListener('blur', () => {
+        if (!deadlineInput.value && targetInput.value) {
+            // Auto-suggest deadline based on target amount
+            const target = parseFloat(targetInput.value);
+            const suggestedDays = target < 10000 ? 30 : target < 50000 ? 90 : 180;
+            
+            const suggestedDate = new Date();
+            suggestedDate.setDate(suggestedDate.getDate() + suggestedDays);
+            deadlineInput.valueAsDate = suggestedDate;
+            
+            // Show helpful message
+            const hint = document.createElement('small');
+            hint.className = 'text-success d-block mt-1';
+            hint.textContent = `💡 Auto-suggested ${suggestedDays} days based on your target!`;
+            if (!deadlineInput.nextElementSibling) {
+                deadlineInput.parentNode.appendChild(hint);
+                setTimeout(() => hint.remove(), 3000);
+            }
+        }
+    });
+</script>
 {% endblock %}
