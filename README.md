@@ -82,12 +82,5 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 - Please add tests for new functionality where appropriate and keep changes focused.
 
 ## .gitignore (recommended)
-Don't commit environment files, venvs or the local DB. Example entries:
-
-```
-.venv/
-trackify.db
-_pycache_/
-.vscode/
-```
+Don't commit environment files, venvs or the local DB. 
 
