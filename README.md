@@ -84,3 +84,26 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 ## .gitignore (recommended)
 Don't commit environment files, venvs or the local DB. 
 
+# Trackify
+
+A lightweight personal finance and expense tracking web application.
+
+---
+
+## Motivation
+
+Managing daily personal expenses across multiple categories is often cluttered and tedious. Trackify was built to provide a clean, fast, and local-first personal finance tracker that offers instant visual insights into spending habits and monthly category breakdowns without third-party tracking overhead.
+
+---
+
+## Quick Start
+
+### Prerequisites
+- Python 3.10+
+- `pip`
+
+### Setup & Run
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/namratha31/trackify.git](https://github.com/namratha31/trackify.git)
+   cd trackify
