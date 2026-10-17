@@ -107,9 +107,15 @@ Managing daily personal expenses across multiple categories is often cluttered a
 - SQLite (local development DB)
 - Bootstrap 5 and Chart.js (UI and charts)
 
+5. Open your browser to: `http://127.0.0.1:5000`
+
+## Usage
+
+- **Log Transactions:** Add income and expense entries with descriptions.
 ## Quick Start
 
 1. Open PowerShell and change into the project directory:
 
 ```powershell
 cd 'C:\Users\Admin\Desktop\py nam\trackify'
+
