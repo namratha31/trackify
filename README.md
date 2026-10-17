@@ -84,26 +84,32 @@ gunicorn -w 4 -b 0.0.0.0:8000 app:app
 ## .gitignore (recommended)
 Don't commit environment files, venvs or the local DB. 
 
-# Trackify
+# Trackify — Simple Expense Tracker
 
-A lightweight personal finance and expense tracking web application.
-
----
+Trackify is a minimal personal finance app to track income and expenses, categorize them, and visualize spending habits.
+It is designed to be simple, visually clean, and easy to run locally for learning personal budgeting.
 
 ## Motivation
 
 Managing daily personal expenses across multiple categories is often cluttered and tedious. Trackify was built to provide a clean, fast, and local-first personal finance tracker that offers instant visual insights into spending habits and monthly category breakdowns without third-party tracking overhead.
 
----
+## Features
+- Add income and expense transactions with date, category and optional note
+- Create a new category inline when adding a transaction
+- View a dashboard with totals, recent transactions, expenses by category (pie), and monthly net (line)
+- List and delete transactions
+- Small, single-file Flask backend with SQLite for quick local use
+
+## Tech stack
+- Python 3.10+ (virtualenv recommended)
+- Flask (backend web framework)
+- Flask-SQLAlchemy (ORM)
+- SQLite (local development DB)
+- Bootstrap 5 and Chart.js (UI and charts)
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.10+
-- `pip`
+1. Open PowerShell and change into the project directory:
 
-### Setup & Run
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/namratha31/trackify.git](https://github.com/namratha31/trackify.git)
-   cd trackify
+```powershell
+cd 'C:\Users\Admin\Desktop\py nam\trackify'
